@@ -26,6 +26,24 @@ RUN apt-get -q update \
       git.sv.gnu.org \
     |& grep -v -F '#' >>~/.ssh/known_hosts
 
+# tools which don't need to be built using Golang
+RUN cd /tmp \
+ && curl --silent --show-error --fail --location --remote-name-all \
+       $(curl --silent --show-error --fail --location --header 'Accept: application/json' --compressed \
+         "https://api.github.com/repos/google/protobuf/releases" \
+         | jq -r '.[].assets[] | select((.browser_download_url|endswith(".zip")) and (.browser_download_url|contains("/protoc-"))) | .browser_download_url' \
+         | grep -m 1 -F linux-x86_64) \
+ && unzip protoc-*.zip bin/protoc -d /usr/ \
+ && chmod a+x /usr/bin/protoc \
+ && /usr/bin/protoc --version \
+ && rm protoc-*.zip \
+ && curl --silent --show-error --fail --location --header "Accept: application/tar+xz, application/x-xz, application/octet-stream" \
+      $(curl --silent --show-error --fail --location --header 'Accept: application/json' \
+        "https://api.github.com/repos/upx/upx/releases/latest" \
+        | jq -r '.assets[] | select(.name | contains("linux")) | select(.name | contains("'$(dpkg --print-architecture)'")) | select(.browser_download_url | contains(".tar.xz")) | .browser_download_url') \
+    | tar --no-same-owner --strip-components=1 --wildcards -C /usr/bin/ -xJ "*/upx" \
+ && /usr/bin/upx --version
+
 ENV GOLANG_VERSION="1.8.7" \
     GOPATH="/go" \
     GOROOT="/opt/go" \
