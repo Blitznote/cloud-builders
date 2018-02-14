@@ -1,3 +1,14 @@
+FROM blitznote/golang:latest as gotools
+
+RUN go get \
+      github.com/gordonklaus/ineffassign \
+      github.com/golang/lint/golint \
+      github.com/golang/dep/cmd/dep \
+ && go get -d github.com/Masterminds/glide \
+ && (cd $GOPATH/src/github.com/Masterminds/glide/ && make build && mv glide $GOPATH/bin/) \
+ && find $GOPATH/bin -type f -executable \
+    | xargs --max-lines=1 --max-procs=$(nproc) --no-run-if-empty upx --best -q
+
 FROM       blitznote/debase:16.04
 
 # prereqs used by and with some Golang packages
@@ -63,5 +74,7 @@ RUN mkdir -p "${GOPATH}" "${GOROOT}" \
       "https://dl.google.com/go/go${GOLANG_VERSION}.linux-$(dpkg --print-architecture).tar.gz" \
     | tar --no-same-owner --strip-components=1 -xz -C "${GOROOT}"/ \
  && go version
+
+COPY --from=gotools --chown=0:0 /go/bin/* /usr/local/bin/
 
 WORKDIR $GOPATH
