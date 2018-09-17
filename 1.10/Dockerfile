@@ -75,6 +75,6 @@ RUN mkdir -p "${GOPATH%%:*}" "${GOROOT}" \
     | tar --no-same-owner --strip-components=1 -xz -C "${GOROOT}"/ \
  && go version
 
-COPY --from=gotools --chown=0:0 /go/bin/* /usr/local/bin/
+COPY --from=gotools /go/bin/* /usr/local/bin/
 
 WORKDIR /go
