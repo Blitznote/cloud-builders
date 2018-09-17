@@ -5,8 +5,8 @@ RUN go get \
       github.com/golang/lint/golint \
       github.com/golang/dep/cmd/dep \
  && go get -d github.com/Masterminds/glide \
- && (cd $GOPATH/src/github.com/Masterminds/glide/ && make build && mv glide $GOPATH/bin/) \
- && find $GOPATH/bin -type f -executable \
+ && (cd ${GOPATH%%:*}/src/github.com/Masterminds/glide/ && make build && mv glide ${GOPATH%%:*}/bin/) \
+ && find ${GOPATH%%:*}/bin -type f -executable \
     | xargs --max-lines=1 --max-procs=$(nproc) --no-run-if-empty upx --best -q
 
 FROM       blitznote/debase:16.04
@@ -56,9 +56,9 @@ RUN cd /tmp \
  && /usr/bin/upx --version
 
 ENV GOLANG_VERSION="1.10.4" \
-    GOPATH="/go" \
+    GOPATH="/go:/usr/share/gocode" \
     GOROOT="/opt/go" \
-    PATH="$GOPATH/bin:/opt/go/bin:$PATH"
+    PATH="/go/bin:/opt/go/bin:$PATH"
 
 LABEL org.label-schema.vendor="Blitznote" \
       org.label-schema.name="Golang" \
@@ -68,8 +68,8 @@ LABEL org.label-schema.vendor="Blitznote" \
       org.label-schema.vcs-url="https://github.com/Blitznote/golang"
 
 # install the pre-compiled vanilla Golang to /opt/go
-RUN mkdir -p "${GOPATH}" "${GOROOT}" \
- && chmod 1777 "${GOPATH}" \
+RUN mkdir -p "${GOPATH%%:*}" "${GOROOT}" \
+ && chmod 1777 "${GOPATH%%:*}" \
  && curl --fail --location --silent --show-error -o - \
       "https://dl.google.com/go/go${GOLANG_VERSION}.linux-$(dpkg --print-architecture).tar.gz" \
     | tar --no-same-owner --strip-components=1 -xz -C "${GOROOT}"/ \
@@ -77,4 +77,4 @@ RUN mkdir -p "${GOPATH}" "${GOROOT}" \
 
 COPY --from=gotools --chown=0:0 /go/bin/* /usr/local/bin/
 
-WORKDIR $GOPATH
+WORKDIR /go
