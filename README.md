@@ -15,4 +15,4 @@ as well as the most recent release of [protoc](https://github.com/google/protobu
 
 This image branches from [blitznote/debase](https://github.com/Blitznote/debase).  
 Please see its README file for details and requirements.
-It won't run on old cpu micro-architectures, and needs Linux 4.4.100 or the like or later.
+It won't run on old cpu micro-architectures, and needs Linux 4.4.110 or the like or later.
