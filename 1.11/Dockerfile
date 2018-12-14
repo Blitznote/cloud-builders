@@ -55,7 +55,7 @@ RUN cd /tmp \
     | tar --no-same-owner --strip-components=1 --wildcards -C /usr/bin/ -xJ "*/upx" \
  && /usr/bin/upx --version
 
-ENV GOLANG_VERSION="1.11" \
+ENV GOLANG_VERSION="1.11.3" \
     GOPATH="/go:/usr/share/gocode" \
     GOROOT="/opt/go" \
     PATH="/go/bin:/opt/go/bin:$PATH"
