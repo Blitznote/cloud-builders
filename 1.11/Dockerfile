@@ -76,5 +76,7 @@ RUN mkdir -p "${GOPATH%%:*}" "${GOROOT}" \
  && go version
 
 COPY --from=gotools /go/bin/* /usr/local/bin/
+COPY prepare-workspace.bash /usr/share/
 
+ENTRYPOINT ["/usr/share/prepare-workspace.bash"]
 WORKDIR /go
