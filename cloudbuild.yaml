@@ -54,9 +54,37 @@ steps:
   id: 'tag golang current'
   args: ['tag', '${_PUBLIC_HUB}/golang:1.11', '${_GCR_HOST}/$PROJECT_ID/golang:1.11']
 
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['golang']
+  dir: 'golang/gofmt'
+  id: 'golang/gofmt'
+  args: ['build',
+    '--tag=${_GCR_HOST}/$PROJECT_ID/golang/gofmt',
+    '--tag=${_PUBLIC_HUB}/gofmt',
+    '.']
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['golang']
+  dir: 'golang/golint'
+  id: 'golang/golint'
+  args: ['build',
+    '--tag=${_GCR_HOST}/$PROJECT_ID/golang/golint',
+    '--tag=${_PUBLIC_HUB}/golint',
+    '.']
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['golang']
+  dir: 'golang/ineffassign'
+  id: 'golang/ineffassign'
+  args: ['build',
+    '--tag=${_GCR_HOST}/$PROJECT_ID/golang/ineffassign',
+    '--tag=${_PUBLIC_HUB}/ineffassign',
+    '.']
+
 images:
 - '${_GCR_HOST}/$PROJECT_ID/git'
 - '${_GCR_HOST}/$PROJECT_ID/gcc'
 - '${_GCR_HOST}/$PROJECT_ID/cmake'
 - '${_GCR_HOST}/$PROJECT_ID/golang:1.11'
 - '${_GCR_HOST}/$PROJECT_ID/golang:1.10'
+- '${_GCR_HOST}/$PROJECT_ID/golang/gofmt'
+- '${_GCR_HOST}/$PROJECT_ID/golang/golint'
+- '${_GCR_HOST}/$PROJECT_ID/golang/ineffassign'
