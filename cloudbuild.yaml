@@ -1,0 +1,62 @@
+tags: ['docker', 'amd64']
+substitutions:
+# Change this to 'eu.gcr.io' or 'asia.' if the region is known.
+  _GCR_HOST:   'gcr.io'
+  _PUBLIC_HUB: 'docker.io/blitznote'
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'pull common base image'
+  args: ['pull', '${_PUBLIC_HUB}/debase:16.04']
+
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['pull common base image']
+  dir: 'git'
+  id: 'git'
+  args: ['build',
+    '--tag=${_GCR_HOST}/$PROJECT_ID/git',
+    '--tag=${_PUBLIC_HUB}/git',
+    '--tag=blitznote/git',
+    '.']
+
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['pull common base image']
+  dir: 'gcc'
+  id: 'gcc'
+  args: ['build',
+    '--tag=${_GCR_HOST}/$PROJECT_ID/gcc',
+    '--tag=${_PUBLIC_HUB}/gcc',
+    '--tag=blitznote/gcc',
+    '.']
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['gcc']
+  dir: 'cmake'
+  id: 'cmake'
+  args: ['build',
+    '--tag=${_GCR_HOST}/$PROJECT_ID/cmake',
+    '--tag=${_PUBLIC_HUB}/cmake',
+    '--tag=blitznote/cmake',
+    '.']
+
+- name: 'gcr.io/cloud-builders/docker'
+  env: ['CI_REGISTRY_IMAGE=${_PUBLIC_HUB}/golang']
+  waitFor: ['gcc']
+  dir: 'golang'
+  id: 'golang'
+  entrypoint: '/bin/bash'
+  args: ['assemble.sh', '1.11.4', '1.10.7']
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['golang']
+  id: 'tag golang prev'
+  args: ['tag', '${_PUBLIC_HUB}/golang:1.10', '${_GCR_HOST}/$PROJECT_ID/golang:1.10']
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['golang']
+  id: 'tag golang current'
+  args: ['tag', '${_PUBLIC_HUB}/golang:1.11', '${_GCR_HOST}/$PROJECT_ID/golang:1.11']
+
+images:
+- '${_GCR_HOST}/$PROJECT_ID/git'
+- '${_GCR_HOST}/$PROJECT_ID/gcc'
+- '${_GCR_HOST}/$PROJECT_ID/cmake'
+- '${_GCR_HOST}/$PROJECT_ID/golang:1.11'
+- '${_GCR_HOST}/$PROJECT_ID/golang:1.10'
