@@ -79,6 +79,35 @@ steps:
     '--tag=${_PUBLIC_HUB}/ineffassign',
     '.']
 
+# Push to (public) Dockerhub.
+# Could be done as soon as an image has been built, but I'd like to keep this atomic to avoid inconsistencies in case one failed.
+
+# Usually you'd want secrets to linger around as late as possible.
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'get credentials for Dockerhub'
+  args: ['kms', 'decrypt',
+    '--keyring=services', '--key=dockerhub',
+    '--plaintext-file=.docker/config.json', '--ciphertext-file=.docker/config.json.encrypted',
+    '--location=global']
+- &docker_push
+  name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['get credentials for Dockerhub']
+  env: ['HOME=/workspace']
+  args: ['push', '${_PUBLIC_HUB}/git']
+- <<: *docker_push
+  args: ['push', '${_PUBLIC_HUB}/gcc']
+- <<: *docker_push
+  args: ['push', '${_PUBLIC_HUB}/cmake']
+- <<: *docker_push
+  args: ['push', '${_PUBLIC_HUB}/golang']
+
+# Finally, shred the plaintext secret.
+# Any image that comes with `shred` will do here; shredding is not guaranteed to be effective because the filesystem in use is unknown.
+- name: '${_PUBLIC_HUB}/git'
+  id: 'shred secrets'
+  entrypoint: '/usr/bin/shred'
+  args: ['.docker/config.json']
+
 images:
 - '${_GCR_HOST}/$PROJECT_ID/git'
 - '${_GCR_HOST}/$PROJECT_ID/gcc'

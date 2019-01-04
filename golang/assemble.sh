@@ -40,6 +40,7 @@ build_one_version() {
   # This will overwrite any preliminary 'latest' image created above.
   if [[ "${VER}" == "$(printf "${latest}" | cut -d '.' -f -2)"* ]]; then
     docker tag "${CI_REGISTRY_IMAGE}:${VER}" "${CI_REGISTRY_IMAGE}:latest"
+    docker tag "${CI_REGISTRY_IMAGE}:${VER}" "${CI_REGISTRY_IMAGE}:${VER%%.*}" # Yes, promote even a beta to '1'.
   fi
 
   popd
