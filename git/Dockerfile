@@ -1,6 +1,6 @@
 FROM blitznote/debase:16.04
 
-ENTRYPOINT ['/usr/bin/git']
+ENTRYPOINT ["/usr/bin/git"]
 
 RUN apt-get -q update \
  && apt-get -y --no-install-recommends install \

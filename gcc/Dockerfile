@@ -1,6 +1,6 @@
 FROM blitznote/debase:16.04
 
-ENTRYPOINT ['/bin/bash', '-c']
+ENTRYPOINT ["/bin/bash", "-c"]
 
 RUN apt-get -q update \
  && apt-get -y --no-install-recommends install \

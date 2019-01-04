@@ -1,6 +1,6 @@
 FROM blitznote/gcc:latest
 
-ENTRYPOINT ['/usr/bin/cmake']
+ENTRYPOINT ["/usr/bin/cmake"]
 
 RUN apt-get -q update \
  && apt-get -y --no-install-recommends install \
