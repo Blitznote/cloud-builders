@@ -30,6 +30,17 @@ steps:
     '.']
 - name: 'gcr.io/cloud-builders/docker'
   waitFor: ['gcc']
+  id: 'gcc tag version'
+  entrypoint: '/bin/bash'
+  args: ['-c', 'docker tag "${_PUBLIC_HUB}/gcc:latest" "${_PUBLIC_HUB}/gcc:$(docker run -t --rm blitznote/gcc "gcc -v |& tail -n 1 | cut -d ' ' -f 3")"']
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['gcc']
+  id: 'gcc tag minor'
+  entrypoint: '/bin/bash'
+  args: ['-c', 'docker tag "${_PUBLIC_HUB}/gcc:latest" "${_PUBLIC_HUB}/gcc:$(docker run -t --rm blitznote/gcc "gcc -v |& tail -n 1 | cut -d ' ' -f 3 | cut -b -3")"']
+
+- name: 'gcr.io/cloud-builders/docker'
+  waitFor: ['gcc']
   dir: 'cmake'
   id: 'cmake'
   args: ['build',
